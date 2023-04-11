@@ -1,0 +1,20 @@
+---
+title: "Climate"
+author: "Elise Boos, Kelsey Husted, Taro Katayama"
+date: "2023-04-11"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load Data
+
+```{r cars}
+require(tidyverse)
+
+temp <- read.csv("./Data_Raw/Temperature_Data.csv")
+prec <- read.csv("./Data_Raw/Precipitation_Data.csv")
+```
+
