@@ -3,6 +3,8 @@ title: "Climate"
 author: "Elise Boos, Kelsey Husted, Taro Katayama"
 date: "2023-04-11"
 output: pdf_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -16,5 +18,20 @@ require(tidyverse)
 
 temp <- read.csv("./Data_Raw/Temperature_Data.csv")
 prec <- read.csv("./Data_Raw/Precipitation_Data.csv")
+```
+
+##Tidy data
+```{r}
+temp_processed<- temp%>%
+  mutate(Date = as.Date(Date, format = "%d-%m-%y"))%>%
+  rename(Temp= Temperaturedaily)%>%
+  arrange(Date, Country)%>%
+  select(Date, Country, Temp)
+
+prec_processed<- prec%>%
+  mutate(Date = as.Date(Date, format = "%d-%m-%y"))%>%
+  rename(Precip= Precipitationdaily)%>%
+  #arrange(Date)%>%
+  select(Date, Country, Precip)
 ```
 
