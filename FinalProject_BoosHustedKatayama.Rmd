@@ -46,8 +46,8 @@ BRA_precip <- prec_processed%>%
   filter(Country == 'BRA')
 
 #Time series transformation
-ts_temp_BRA <- ts(BRA_temp[,3], frequency = 12, start = c(2000,1))
-ts_precip_BRA <- ts(BRA_precip[,3], frequency = 12, start = c(2000,1))
+ts_temp_BRA <- ts(BRA_temp[,3], frequency = 365, start = c(2000,1))
+ts_precip_BRA <- ts(BRA_precip[,3], frequency = 365, start = c(2000,1))
 
 #Decompose
 decompose_temp_BRA <- decompose(ts_temp_BRA, type = "additive")
@@ -67,8 +67,8 @@ USA_precip <- prec_processed%>%
   filter(Country == 'USA')
 
 #Time series transformation
-ts_temp_USA <- ts(USA_temp[,3], frequency = 12, start = c(2000,1))
-ts_precip_USA <- ts(USA_precip[,3], frequency = 12, start = c(2000,1))
+ts_temp_USA <- ts(USA_temp[,3], frequency = 365, start = c(2000,1))
+ts_precip_USA <- ts(USA_precip[,3], frequency = 365, start = c(2000,1))
 
 #Decompose
 decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
