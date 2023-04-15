@@ -35,3 +35,23 @@ prec_processed<- prec%>%
   select(Date, Country, Precip)
 ```
 
+##Time series transformation (Brazil)
+```{r}
+#Filter for Brazil 
+#Temperature
+BRA_temp <- temp_processed%>%
+  filter(Country == 'BRA')
+#Precipitation
+BRA_precip <- prec_processed%>%
+  filter(Country == 'BRA')
+
+#Time series transformation
+ts_temp_BRA <- ts(BRA_temp[,3], frequency = 12, start = c(2000,1))
+ts_precip_BRA <- ts(BRA_precip[,3], frequency = 12, start = c(2000,1))
+
+#Decompose
+decompose_temp_BRA <- decompose(ts_temp_BRA, type = "additive")
+plot(decompose_temp_BRA)
+decompose_precip_BRA <- decompose(ts_precip_BRA, type = "additive")
+plot(decompose_precip_BRA)
+```
