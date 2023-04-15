@@ -15,6 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r cars}
 require(tidyverse)
+require(tseries)
+require(forecast)
+require(ggplot2)
 
 temp <- read.csv("./Data_Raw/Temperature_Data.csv")
 prec <- read.csv("./Data_Raw/Precipitation_Data.csv")
@@ -75,4 +78,35 @@ decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
 plot(decompose_temp_USA)
 decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
 plot(decompose_precip_USA)
+```
+
+```{r forecast}
+#AUTO ARTIMA
+arima <- auto.arima(ts_temp_BRA,seasonal=TRUE, 
+                             lambda=0)
+arima
+checkresiduals(arima)
+
+ARIMA_forecast <- forecast(arima,h=1825) 
+
+
+
+#### NEURAL NETWORK 
+NN_fit <- nnetar(ts_temp_BRA,p=1,P=1)
+
+#5 year forecast
+NN_for <- forecast(NN_fit, h=1825)
+
+
+
+
+###PLOT
+autoplot(ts_temp_BRA) +
+  autolayer(NN_for, series="Neural Network",PI=FALSE)+
+  autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
+  ylab("Tempurature") 
+
+
+
+
 ```
