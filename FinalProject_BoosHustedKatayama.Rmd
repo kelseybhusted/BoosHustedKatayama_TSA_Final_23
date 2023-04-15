@@ -55,3 +55,24 @@ plot(decompose_temp_BRA)
 decompose_precip_BRA <- decompose(ts_precip_BRA, type = "additive")
 plot(decompose_precip_BRA)
 ```
+
+##Time series transformation (USA)
+```{r}
+#Filter for USA
+#Temperature
+USA_temp <- temp_processed%>%
+  filter(Country == 'USA')
+#Precipitation
+USA_precip <- prec_processed%>%
+  filter(Country == 'USA')
+
+#Time series transformation
+ts_temp_USA <- ts(USA_temp[,3], frequency = 12, start = c(2000,1))
+ts_precip_USA <- ts(USA_precip[,3], frequency = 12, start = c(2000,1))
+
+#Decompose
+decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
+plot(decompose_temp_USA)
+decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
+plot(decompose_precip_USA)
+```
