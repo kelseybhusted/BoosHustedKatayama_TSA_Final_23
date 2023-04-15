@@ -90,7 +90,6 @@ checkresiduals(arima)
 ARIMA_forecast <- forecast(arima,h=1825) 
 
 
-
 #### NEURAL NETWORK 
 NN_fit <- nnetar(ts_temp_BRA,p=1,P=1)
 
@@ -98,12 +97,10 @@ NN_fit <- nnetar(ts_temp_BRA,p=1,P=1)
 NN_for <- forecast(NN_fit, h=1825)
 
 
-
+### TBATS
 TBATS_fit <- tbats(ts_temp_BRA)
 
 TBATS_for <- forecast(TBATS_fit, h=1825)
-
-
 
 
 ###PLOT
@@ -112,8 +109,5 @@ autoplot(ts_temp_BRA) +
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
   autolayer(TBATS_for,series="TBATS",PI=FALSE) +
   ylab("Tempurature") 
-
-
-
 
 ```
