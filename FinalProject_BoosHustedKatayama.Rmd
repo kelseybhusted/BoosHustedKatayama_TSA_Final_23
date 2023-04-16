@@ -59,6 +59,9 @@ ts_temp_BRA2 <- msts(BRA_temp[,3], seasonal.periods =c(7,365.25),
 decompose_temp_BRA <- decompose(ts_temp_BRA, type = "additive")
 plot(decompose_temp_BRA)
 
+ggplot(BRA_temp, aes(x=Date, y =Temp))+
+  geom_line()+
+  geom_smooth(method = lm)
 
 summary(SeasonalMannKendall(ts_temp_BRA))
 ```
@@ -83,6 +86,10 @@ ts_temp_USA2 <- msts(USA_temp[,3], seasonal.periods =c(7,365.25),
 decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
 plot(decompose_temp_USA)
 
+ggplot(USA_temp, aes(x=Date, y =Temp))+
+  geom_line()+
+  geom_smooth(method = lm)
+
 summary(SeasonalMannKendall(ts_temp_USA))
 ```
 
@@ -106,6 +113,9 @@ ts_temp_AUS2 <- msts(AUS_temp[,3], seasonal.periods =c(7,365.25),
 decompose_temp_AUS <- decompose(ts_temp_AUS, type = "additive")
 plot(decompose_temp_AUS)
 
+ggplot(AUS_temp, aes(x=Date, y =Temp))+
+  geom_line()+
+  geom_smooth(method = lm)
 
 summary(SeasonalMannKendall(ts_temp_AUS))
 ```
