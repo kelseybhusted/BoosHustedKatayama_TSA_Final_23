@@ -38,7 +38,7 @@ prec_processed<- prec%>%
   select(Date, Country, Precip)
 ```
 
-##Time series transformation (Brazil)
+##Time series transformation (BRA)
 ```{r}
 #Filter for Brazil 
 #Temperature
@@ -80,6 +80,29 @@ decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
 plot(decompose_precip_USA)
 ```
 
+##Time series transformation (AUS)
+```{r}
+#Filter for Australia
+#Temperature
+AUS_temp <- temp_processed%>%
+  filter(Country == 'AUS')
+#Precipitation
+AUS_precip <- prec_processed%>%
+  filter(Country == 'AUS')
+
+#Time series transformation
+ts_temp_AUS <- ts(AUS_temp[,3], frequency = 365, start = c(2000,1))
+ts_precip_AUS <- ts(AUS_precip[,3], frequency = 365, start = c(2000,1))
+
+#Decompose
+decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
+plot(decompose_temp_USA)
+decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
+plot(decompose_precip_USA)
+```
+
+
+##Forecasting (BRA)
 ```{r forecast}
 #AUTO ARTIMA
 arima <- auto.arima(ts_temp_BRA,seasonal=FALSE, 
@@ -108,6 +131,6 @@ autoplot(ts_temp_BRA) +
   autolayer(NN_for, series="Neural Network",PI=FALSE)+
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
   autolayer(TBATS_for,series="TBATS",PI=FALSE) +
-  ylab("Tempurature") 
+  ylab("Temperature") 
 
 ```
