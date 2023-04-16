@@ -294,7 +294,7 @@ autoplot(window(ts_temp_AUS, start = c(2019,1))) +
 arima_AUS <- auto.arima(ts_temp_AUS,seasonal=FALSE, 
                              lambda=0)
 
-ARIMA_forecast_AUS <- forecast(arima_AUS,h=365)
+ARIMA_forecast <- forecast(arima_AUS,h=365)
 
 ### ARIMA + Fourier Terms
 ARIMA_Four <- auto.arima(ts_temp_AUS2,
