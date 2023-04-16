@@ -52,9 +52,15 @@ BRA_temp <- temp_processed%>%
 BRA_precip <- prec_processed%>%
   filter(Country == 'BRA')
 
-#Time series transformation
+#Time series transformation ts()
 ts_temp_BRA <- ts(BRA_temp[,3], frequency = 365, start = c(2000,1))
 ts_precip_BRA <- ts(BRA_precip[,3], frequency = 365, start = c(2000,1))
+
+#Time series transformation msts()
+ts_temp_BRA2 <- msts(BRA_temp[,3], seasonal.periods =c(7,365.25),
+                           start=c(2000,01,01))
+ts_precip_BRA2 <- msts(BRA_precip[,3], seasonal.periods =c(7,365.25),
+                           start=c(2000,01,01))
 
 #Decompose
 decompose_temp_BRA <- decompose(ts_temp_BRA, type = "additive")
@@ -120,39 +126,40 @@ checkresiduals(arima)
 ARIMA_forecast <- forecast(arima,h=1825)
 
 ### ARIMA + Fourier Terms
-ARIMA_Four <- auto.arima(ts_temp_BRA,
+ARIMA_Four <- auto.arima(ts_temp_BRA2,
                          seasonal=FALSE,
                          lambda=0,
-                         xreg=fourier(ts_temp_BRA,
-                                      K=c(2,12)))
+                         xreg=fourier(ts_temp_BRA2,
+                                      K=c(2,16)))
 ARIMA_Four_for <- forecast(ARIMA_Four,
-                           xreg=fourier(ts_temp_BRA,
-                                        K=c(2,12),
+                           xreg=fourier(ts_temp_BRA2,
+                                        K=c(2,16),
                                         h=1825),
                            h=1825)
 
 #### NEURAL NETWORK 
-NN_fit <- nnetar(ts_temp_BRA,p=1,P=1)
+NN_fit <- nnetar(ts_temp_BRA2,p=1,P=1)
 
 #5 year forecast
 NN_for <- forecast(NN_fit, h=1825)
 
 
 ### TBATS
-TBATS_fit <- tbats(ts_temp_BRA)
+TBATS_fit <- tbats(ts_temp_BRA2)
 
 TBATS_for <- forecast(TBATS_fit, h=1825)
 
 ### STL + ETS
-ETS_fit <- stlf(ts_temp_BRA, h=1825)
+ETS_fit <- stlf(ts_temp_BRA2, h=1825)
 
 
 ###PLOT
 autoplot(ts_temp_BRA) +
   autolayer(NN_for, series="Neural Network",PI=FALSE)+
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
-  autolayer(TBATS_for,series="TBATS",PI=FALSE) +
-  autolayer(ETS_fit,series="STL + ETS",PI=FALSE)
+  autolayer(TBATS_for,series="TBATS",PI=FALSE)+
+  autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
+  autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
   ylab("Temperature") 
 
 ```
