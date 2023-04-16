@@ -4,7 +4,7 @@ author: "Elise Boos, Kelsey Husted, Taro Katayama"
 date: "2023-04-11"
 output: pdf_document
 editor_options: 
-  chunk_output_type: console
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -23,7 +23,9 @@ temp <- read.csv("./Data_Raw/Temperature_Data.csv")
 prec <- read.csv("./Data_Raw/Precipitation_Data.csv")
 ```
 
+
 ##Tidy data
+
 ```{r}
 temp_processed<- temp%>%
   mutate(Date = as.Date(Date, format = "%d-%m-%y"))%>%
@@ -38,7 +40,9 @@ prec_processed<- prec%>%
   select(Date, Country, Precip)
 ```
 
+
 ##Time series transformation (BRA)
+
 ```{r}
 #Filter for Brazil 
 #Temperature
@@ -59,7 +63,9 @@ decompose_precip_BRA <- decompose(ts_precip_BRA, type = "additive")
 plot(decompose_precip_BRA)
 ```
 
+
 ##Time series transformation (USA)
+
 ```{r}
 #Filter for USA
 #Temperature
@@ -80,7 +86,9 @@ decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
 plot(decompose_precip_USA)
 ```
 
+
 ##Time series transformation (AUS)
+
 ```{r}
 #Filter for Australia
 #Temperature
@@ -95,14 +103,13 @@ ts_temp_AUS <- ts(AUS_temp[,3], frequency = 365, start = c(2000,1))
 ts_precip_AUS <- ts(AUS_precip[,3], frequency = 365, start = c(2000,1))
 
 #Decompose
-decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
-plot(decompose_temp_USA)
-decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
-plot(decompose_precip_USA)
+decompose_temp_AUS <- decompose(ts_temp_AUS, type = "additive")
+plot(decompose_temp_AUS)
+decompose_precip_AUS <- decompose(ts_precip_AUS, type = "additive")
+plot(decompose_precip_AUS)
 ```
 
-
-##Forecasting (BRA)
+##Temperature Forecasting (BRA)
 ```{r forecast}
 #AUTO ARTIMA
 arima <- auto.arima(ts_temp_BRA,seasonal=FALSE, 
@@ -110,8 +117,19 @@ arima <- auto.arima(ts_temp_BRA,seasonal=FALSE,
 arima
 checkresiduals(arima)
 
-ARIMA_forecast <- forecast(arima,h=1825) 
+ARIMA_forecast <- forecast(arima,h=1825)
 
+### ARIMA + Fourier Terms
+ARIMA_Four <- auto.arima(ts_temp_BRA,
+                         seasonal=FALSE,
+                         lambda=0,
+                         xreg=fourier(ts_temp_BRA,
+                                      K=c(2,12)))
+ARIMA_Four_for <- forecast(ARIMA_Four,
+                           xreg=fourier(ts_temp_BRA,
+                                        K=c(2,12),
+                                        h=1825),
+                           h=1825)
 
 #### NEURAL NETWORK 
 NN_fit <- nnetar(ts_temp_BRA,p=1,P=1)
@@ -125,12 +143,16 @@ TBATS_fit <- tbats(ts_temp_BRA)
 
 TBATS_for <- forecast(TBATS_fit, h=1825)
 
+### STL + ETS
+ETS_fit <- stlf(ts_temp_BRA, h=1825)
+
 
 ###PLOT
 autoplot(ts_temp_BRA) +
   autolayer(NN_for, series="Neural Network",PI=FALSE)+
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
   autolayer(TBATS_for,series="TBATS",PI=FALSE) +
+  autolayer(ETS_fit,series="STL + ETS",PI=FALSE)
   ylab("Temperature") 
 
 ```
