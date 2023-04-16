@@ -118,13 +118,74 @@ plot(decompose_temp_AUS)
 # plot(decompose_precip_AUS)
 ```
 
+
+##Temperature Forecasting Test (BRA)
+```{r forecast test}
+#AUTO ARTIMA
+ts_temp_BRA_sub <-window(ts_temp_BRA, start = c(2000,1), end = c(2021,12))
+
+arima <- auto.arima(ts_temp_BRA_sub,seasonal=FALSE, 
+                             lambda=0)
+
+ARIMA_forecast <- forecast(arima,h=365)
+
+
+ts_temp_BRA2_sub <-window(ts_temp_BRA2, start = c(2000,1), end = c(2021,12))
+### ARIMA + Fourier Terms
+ARIMA_Four <- auto.arima(ts_temp_BRA2_sub,
+                         seasonal=FALSE,
+                         lambda=0,
+                         xreg=fourier(ts_temp_BRA2_sub,
+                                      K=c(2,12)))
+ARIMA_Four_for <- forecast(ARIMA_Four,
+                           xreg=fourier(ts_temp_BRA2_sub,
+                                        K=c(2,12),
+                                        h=365),
+                           h=365)
+
+#### NEURAL NETWORK 
+NN_fit <- nnetar(ts_temp_BRA2_sub,p=1,P=1)
+
+#5 year forecast
+NN_for <- forecast(NN_fit, h=365)
+
+
+### TBATS
+TBATS_fit <- tbats(ts_temp_BRA2_sub)
+
+TBATS_for <- forecast(TBATS_fit, h=365)
+
+### STL + ETS
+ETS_fit <- stlf(ts_temp_BRA2_sub, h=365)
+
+###ACCURACY
+a_score <- accuracy(ARIMA_forecast)
+a2_score <- accuracy(ARIMA_Four_for)
+NN_score <- accuracy(NN_for)
+TBATS_score <- accuracy(TBATS_for)
+ETS_score <- accuracy(ETS_fit)
+
+
+scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
+row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
+scores
+
+
+autoplot(window(ts_temp_BRA, start = c(2019,1))) +
+  autolayer(NN_for, series="Neural Network",PI=FALSE)+
+  autolayer(TBATS_for,series="TBATS",PI=FALSE)+
+  autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
+  autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
+  autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
+  ylab("Temperature") 
+```
+
+
 ##Temperature Forecasting (BRA)
 ```{r forecast}
 #AUTO ARTIMA
 arima <- auto.arima(ts_temp_BRA,seasonal=FALSE, 
                              lambda=0)
-arima
-checkresiduals(arima)
 
 ARIMA_forecast <- forecast(arima,h=365)
 
@@ -133,10 +194,10 @@ ARIMA_Four <- auto.arima(ts_temp_BRA2,
                          seasonal=FALSE,
                          lambda=0,
                          xreg=fourier(ts_temp_BRA2,
-                                      K=c(2,16)))
+                                      K=c(2,12)))
 ARIMA_Four_for <- forecast(ARIMA_Four,
                            xreg=fourier(ts_temp_BRA2,
-                                        K=c(2,16),
+                                        K=c(2,12),
                                         h=365),
                            h=365)
 
@@ -162,7 +223,18 @@ autoplot(window(ts_temp_BRA, start = c(2019,1))) +
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
   autolayer(TBATS_for,series="TBATS",PI=FALSE)+
   autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
- # autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
+  autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
   ylab("Temperature") 
 
+
+a_score <- accuracy(ARIMA_forecast)
+a2_score <- accuracy(ARIMA_Four_for)
+NN_score <- accuracy(NN_for)
+TBATS_score <- accuracy(TBATS_for)
+ETS_score <- accuracy(ETS_fit)
+
+
+scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
+row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
+scores
 ```
