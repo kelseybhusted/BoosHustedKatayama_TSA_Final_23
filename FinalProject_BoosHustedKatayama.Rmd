@@ -20,7 +20,7 @@ require(forecast)
 require(ggplot2)
 
 temp <- read.csv("./Data_Raw/Temperature_Data.csv")
-prec <- read.csv("./Data_Raw/Precipitation_Data.csv")
+#prec <- read.csv("./Data_Raw/Precipitation_Data.csv")
 ```
 
 
@@ -33,11 +33,11 @@ temp_processed<- temp%>%
   arrange(Date, Country)%>%
   select(Date, Country, Temp)
 
-prec_processed<- prec%>%
-  mutate(Date = as.Date(Date, format = "%d-%m-%y"))%>%
-  rename(Precip= Precipitationdaily)%>%
-  #arrange(Date)%>%
-  select(Date, Country, Precip)
+# prec_processed<- prec%>%
+#   mutate(Date = as.Date(Date, format = "%d-%m-%y"))%>%
+#   rename(Precip= Precipitationdaily)%>%
+#   #arrange(Date)%>%
+#   select(Date, Country, Precip)
 ```
 
 
@@ -49,24 +49,27 @@ prec_processed<- prec%>%
 BRA_temp <- temp_processed%>%
   filter(Country == 'BRA')
 #Precipitation
-BRA_precip <- prec_processed%>%
-  filter(Country == 'BRA')
+# BRA_precip <- prec_processed%>%
+#   filter(Country == 'BRA')
+
+
+fday <- first(BRA_temp$Date)
 
 #Time series transformation ts()
-ts_temp_BRA <- ts(BRA_temp[,3], frequency = 365, start = c(2000,1))
-ts_precip_BRA <- ts(BRA_precip[,3], frequency = 365, start = c(2000,1))
+ts_temp_BRA <- ts(BRA_temp[,3], frequency = 365, start = c(year(fday), month(fday), day(fday)))
+#ts_precip_BRA <- ts(BRA_precip[,3], frequency = 365, start = c(2000,1))
 
 #Time series transformation msts()
 ts_temp_BRA2 <- msts(BRA_temp[,3], seasonal.periods =c(7,365.25),
-                           start=c(2000,01,01))
-ts_precip_BRA2 <- msts(BRA_precip[,3], seasonal.periods =c(7,365.25),
-                           start=c(2000,01,01))
+                           start=c(year(fday), month(fday), day(fday)))
+# ts_precip_BRA2 <- msts(BRA_precip[,3], seasonal.periods =c(7,365.25),
+#                            start=c(2000,01,01))
 
 #Decompose
 decompose_temp_BRA <- decompose(ts_temp_BRA, type = "additive")
 plot(decompose_temp_BRA)
-decompose_precip_BRA <- decompose(ts_precip_BRA, type = "additive")
-plot(decompose_precip_BRA)
+# decompose_precip_BRA <- decompose(ts_precip_BRA, type = "additive")
+# plot(decompose_precip_BRA)
 ```
 
 
@@ -78,18 +81,18 @@ plot(decompose_precip_BRA)
 USA_temp <- temp_processed%>%
   filter(Country == 'USA')
 #Precipitation
-USA_precip <- prec_processed%>%
-  filter(Country == 'USA')
+# USA_precip <- prec_processed%>%
+#   filter(Country == 'USA')
 
 #Time series transformation
 ts_temp_USA <- ts(USA_temp[,3], frequency = 365, start = c(2000,1))
-ts_precip_USA <- ts(USA_precip[,3], frequency = 365, start = c(2000,1))
+# ts_precip_USA <- ts(USA_precip[,3], frequency = 365, start = c(2000,1))
 
 #Decompose
 decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
 plot(decompose_temp_USA)
-decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
-plot(decompose_precip_USA)
+# decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
+# plot(decompose_precip_USA)
 ```
 
 
@@ -101,18 +104,18 @@ plot(decompose_precip_USA)
 AUS_temp <- temp_processed%>%
   filter(Country == 'AUS')
 #Precipitation
-AUS_precip <- prec_processed%>%
-  filter(Country == 'AUS')
+# AUS_precip <- prec_processed%>%
+#   filter(Country == 'AUS')
 
 #Time series transformation
 ts_temp_AUS <- ts(AUS_temp[,3], frequency = 365, start = c(2000,1))
-ts_precip_AUS <- ts(AUS_precip[,3], frequency = 365, start = c(2000,1))
+# ts_precip_AUS <- ts(AUS_precip[,3], frequency = 365, start = c(2000,1))
 
 #Decompose
 decompose_temp_AUS <- decompose(ts_temp_AUS, type = "additive")
 plot(decompose_temp_AUS)
-decompose_precip_AUS <- decompose(ts_precip_AUS, type = "additive")
-plot(decompose_precip_AUS)
+# decompose_precip_AUS <- decompose(ts_precip_AUS, type = "additive")
+# plot(decompose_precip_AUS)
 ```
 
 ##Temperature Forecasting (BRA)
@@ -123,7 +126,7 @@ arima <- auto.arima(ts_temp_BRA,seasonal=FALSE,
 arima
 checkresiduals(arima)
 
-ARIMA_forecast <- forecast(arima,h=1825)
+ARIMA_forecast <- forecast(arima,h=365)
 
 ### ARIMA + Fourier Terms
 ARIMA_Four <- auto.arima(ts_temp_BRA2,
@@ -134,32 +137,32 @@ ARIMA_Four <- auto.arima(ts_temp_BRA2,
 ARIMA_Four_for <- forecast(ARIMA_Four,
                            xreg=fourier(ts_temp_BRA2,
                                         K=c(2,16),
-                                        h=1825),
-                           h=1825)
+                                        h=365),
+                           h=365)
 
 #### NEURAL NETWORK 
 NN_fit <- nnetar(ts_temp_BRA2,p=1,P=1)
 
 #5 year forecast
-NN_for <- forecast(NN_fit, h=1825)
+NN_for <- forecast(NN_fit, h=365)
 
 
 ### TBATS
 TBATS_fit <- tbats(ts_temp_BRA2)
 
-TBATS_for <- forecast(TBATS_fit, h=1825)
+TBATS_for <- forecast(TBATS_fit, h=365)
 
 ### STL + ETS
-ETS_fit <- stlf(ts_temp_BRA2, h=1825)
+ETS_fit <- stlf(ts_temp_BRA2, h=365)
 
 
 ###PLOT
-autoplot(ts_temp_BRA) +
+autoplot(window(ts_temp_BRA, start = c(2019,1))) +
   autolayer(NN_for, series="Neural Network",PI=FALSE)+
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
   autolayer(TBATS_for,series="TBATS",PI=FALSE)+
   autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
-  autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
+ # autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
   ylab("Temperature") 
 
 ```
