@@ -19,6 +19,7 @@ require(tseries)
 require(forecast)
 require(lubridate)
 require(ggplot2)
+require(Kendall)
 
 temp <- read.csv("./Data_Raw/Temperature_Data.csv")
 ```
@@ -58,6 +59,8 @@ ts_temp_BRA2 <- msts(BRA_temp[,3], seasonal.periods =c(7,365.25),
 decompose_temp_BRA <- decompose(ts_temp_BRA, type = "additive")
 plot(decompose_temp_BRA)
 
+
+summary(SeasonalMannKendall(ts_temp_BRA))
 ```
 
 
@@ -79,6 +82,8 @@ ts_temp_USA2 <- msts(USA_temp[,3], seasonal.periods =c(7,365.25),
 #Decompose
 decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
 plot(decompose_temp_USA)
+
+summary(SeasonalMannKendall(ts_temp_USA))
 ```
 
 
@@ -101,6 +106,8 @@ ts_temp_AUS2 <- msts(AUS_temp[,3], seasonal.periods =c(7,365.25),
 decompose_temp_AUS <- decompose(ts_temp_AUS, type = "additive")
 plot(decompose_temp_AUS)
 
+
+summary(SeasonalMannKendall(ts_temp_AUS))
 ```
 
 
