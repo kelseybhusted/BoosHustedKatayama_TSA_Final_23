@@ -20,7 +20,6 @@ require(forecast)
 require(ggplot2)
 
 temp <- read.csv("./Data_Raw/Temperature_Data.csv")
-#prec <- read.csv("./Data_Raw/Precipitation_Data.csv")
 ```
 
 
@@ -33,11 +32,6 @@ temp_processed<- temp%>%
   arrange(Date, Country)%>%
   select(Date, Country, Temp)
 
-# prec_processed<- prec%>%
-#   mutate(Date = as.Date(Date, format = "%d-%m-%y"))%>%
-#   rename(Precip= Precipitationdaily)%>%
-#   #arrange(Date)%>%
-#   select(Date, Country, Precip)
 ```
 
 
@@ -48,28 +42,21 @@ temp_processed<- temp%>%
 #Temperature
 BRA_temp <- temp_processed%>%
   filter(Country == 'BRA')
-#Precipitation
-# BRA_precip <- prec_processed%>%
-#   filter(Country == 'BRA')
 
 
 fday <- first(BRA_temp$Date)
 
 #Time series transformation ts()
 ts_temp_BRA <- ts(BRA_temp[,3], frequency = 365, start = c(year(fday), month(fday), day(fday)))
-#ts_precip_BRA <- ts(BRA_precip[,3], frequency = 365, start = c(2000,1))
 
 #Time series transformation msts()
 ts_temp_BRA2 <- msts(BRA_temp[,3], seasonal.periods =c(7,365.25),
                            start=c(year(fday), month(fday), day(fday)))
-# ts_precip_BRA2 <- msts(BRA_precip[,3], seasonal.periods =c(7,365.25),
-#                            start=c(2000,01,01))
 
 #Decompose
 decompose_temp_BRA <- decompose(ts_temp_BRA, type = "additive")
 plot(decompose_temp_BRA)
-# decompose_precip_BRA <- decompose(ts_precip_BRA, type = "additive")
-# plot(decompose_precip_BRA)
+
 ```
 
 
@@ -80,19 +67,15 @@ plot(decompose_temp_BRA)
 #Temperature
 USA_temp <- temp_processed%>%
   filter(Country == 'USA')
-#Precipitation
-# USA_precip <- prec_processed%>%
-#   filter(Country == 'USA')
+
 
 #Time series transformation
 ts_temp_USA <- ts(USA_temp[,3], frequency = 365, start = c(2000,1))
-# ts_precip_USA <- ts(USA_precip[,3], frequency = 365, start = c(2000,1))
+
 
 #Decompose
 decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
 plot(decompose_temp_USA)
-# decompose_precip_USA <- decompose(ts_precip_USA, type = "additive")
-# plot(decompose_precip_USA)
 ```
 
 
@@ -103,19 +86,14 @@ plot(decompose_temp_USA)
 #Temperature
 AUS_temp <- temp_processed%>%
   filter(Country == 'AUS')
-#Precipitation
-# AUS_precip <- prec_processed%>%
-#   filter(Country == 'AUS')
 
 #Time series transformation
 ts_temp_AUS <- ts(AUS_temp[,3], frequency = 365, start = c(2000,1))
-# ts_precip_AUS <- ts(AUS_precip[,3], frequency = 365, start = c(2000,1))
 
 #Decompose
 decompose_temp_AUS <- decompose(ts_temp_AUS, type = "additive")
 plot(decompose_temp_AUS)
-# decompose_precip_AUS <- decompose(ts_precip_AUS, type = "additive")
-# plot(decompose_precip_AUS)
+
 ```
 
 
