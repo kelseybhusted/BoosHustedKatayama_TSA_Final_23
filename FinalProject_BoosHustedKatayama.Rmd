@@ -17,6 +17,7 @@ knitr::opts_chunk$set(echo = TRUE)
 require(tidyverse)
 require(tseries)
 require(forecast)
+require(lubridate)
 require(ggplot2)
 
 temp <- read.csv("./Data_Raw/Temperature_Data.csv")
@@ -72,7 +73,9 @@ USA_temp <- temp_processed%>%
 #Time series transformation
 ts_temp_USA <- ts(USA_temp[,3], frequency = 365, start = c(2000,1))
 
-
+#Time series transformation msts()
+ts_temp_USA2 <- msts(USA_temp[,3], seasonal.periods =c(7,365.25),
+                           start=c(year(fday), month(fday), day(fday)))
 #Decompose
 decompose_temp_USA <- decompose(ts_temp_USA, type = "additive")
 plot(decompose_temp_USA)
@@ -89,6 +92,10 @@ AUS_temp <- temp_processed%>%
 
 #Time series transformation
 ts_temp_AUS <- ts(AUS_temp[,3], frequency = 365, start = c(2000,1))
+
+#Time series transformation msts()
+ts_temp_AUS2 <- msts(AUS_temp[,3], seasonal.periods =c(7,365.25),
+                           start=c(year(fday), month(fday), day(fday)))
 
 #Decompose
 decompose_temp_AUS <- decompose(ts_temp_AUS, type = "additive")
@@ -197,6 +204,128 @@ ETS_fit <- stlf(ts_temp_BRA2, h=365)
 
 ###PLOT
 autoplot(window(ts_temp_BRA, start = c(2019,1))) +
+  autolayer(NN_for, series="Neural Network",PI=FALSE)+
+  autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
+  autolayer(TBATS_for,series="TBATS",PI=FALSE)+
+  autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
+  autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
+  ylab("Temperature") 
+
+
+a_score <- accuracy(ARIMA_forecast)
+a2_score <- accuracy(ARIMA_Four_for)
+NN_score <- accuracy(NN_for)
+TBATS_score <- accuracy(TBATS_for)
+ETS_score <- accuracy(ETS_fit)
+
+
+scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
+row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
+scores
+```
+
+
+##Temperature Forecasting Test (AUS)
+
+```{r forecast test AUS}
+#AUTO ARTIMA
+ts_temp_AUS_sub <-window(ts_temp_AUS, start = c(2000,1), end = c(2021,12))
+
+arima_AUS <- auto.arima(ts_temp_AUS_sub,seasonal=FALSE, 
+                             lambda=0)
+
+ARIMA_forecast_AUS <- forecast(arima_AUS,h=365)
+
+
+ts_temp_AUS2_sub <-window(ts_temp_AUS2, start = c(2000,1), end = c(2021,12))
+### ARIMA + Fourier Terms
+ARIMA_Four_AUS <- auto.arima(ts_temp_AUS2_sub,
+                         seasonal=FALSE,
+                         lambda=0,
+                         xreg=fourier(ts_temp_AUS2_sub,
+                                      K=c(2,12)))
+ARIMA_Four_AUS_for <- forecast(ARIMA_Four_AUS,
+                           xreg=fourier(ts_temp_AUS2_sub,
+                                        K=c(2,12),
+                                        h=365),
+                           h=365)
+
+#### NEURAL NETWORK 
+NN_fit_AUS <- nnetar(ts_temp_AUS2_sub,p=1,P=1)
+
+#5 year forecast
+NN_for_AUS <- forecast(NN_fit_AUS, h=365)
+
+
+### TBATS
+TBATS_fit_AUS <- tbats(ts_temp_AUS2_sub)
+
+TBATS_for_AUS <- forecast(TBATS_fit_AUS, h=365)
+
+### STL + ETS
+ETS_fit_AUS <- stlf(ts_temp_AUS2_sub, h=365)
+
+###ACCURACY
+a_score_AUS <- accuracy(ARIMA_forecast_AUS)
+a2_score_AUS <- accuracy(ARIMA_Four_AUS_for)
+NN_score_AUS <- accuracy(NN_for_AUS)
+TBATS_score_AUS <- accuracy(TBATS_for_AUS)
+ETS_score_AUS <- accuracy(ETS_fit_AUS)
+
+
+scores_AUS <- as.data.frame(rbind(a_score_AUS, a2_score_AUS, NN_score_AUS, TBATS_score_AUS, ETS_score_AUS))
+row.names(scores_AUS) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
+scores_AUS
+
+
+autoplot(window(ts_temp_AUS, start = c(2019,1))) +
+  autolayer(NN_for_AUS, series="Neural Network",PI=FALSE)+
+  autolayer(TBATS_for_AUS,series="TBATS",PI=FALSE)+
+  autolayer(ETS_fit_AUS,series="STL + ETS",PI=FALSE)+
+  autolayer(ARIMA_Four_AUS_for, series="ARIMA_FOURIER",PI=FALSE)+
+  autolayer(ARIMA_forecast_AUS, series="ARIMA",PI=FALSE)+
+  ylab("Temperature") 
+```
+
+
+##Temperature Forecasting (AUS)
+```{r forecast AUS}
+#AUTO ARTIMA
+arima_AUS <- auto.arima(ts_temp_AUS,seasonal=FALSE, 
+                             lambda=0)
+
+ARIMA_forecast_AUS <- forecast(arima_AUS,h=365)
+
+### ARIMA + Fourier Terms
+ARIMA_Four <- auto.arima(ts_temp_AUS2,
+                         seasonal=FALSE,
+                         lambda=0,
+                         xreg=fourier(ts_temp_AUS2,
+                                      K=c(2,12)))
+ARIMA_Four_for <- forecast(ARIMA_Four,
+                           xreg=fourier(ts_temp_AUS2,
+                                        K=c(2,12),
+                                        h=365),
+                           h=365)
+
+#### NEURAL NETWORK 
+NN_fit <- nnetar(ts_temp_AUS2,p=1,P=1)
+
+#5 year forecast
+NN_for <- forecast(NN_fit, h=365)
+
+
+### TBATS
+TBATS_fit <- tbats(ts_temp_AUS2)
+
+TBATS_for <- forecast(TBATS_fit, h=365)
+
+### STL + ETS
+ETS_fit <- stlf(ts_temp_AUS2, h=365)
+
+
+###PLOT
+autoplot(window(ts_temp_AUS, start = c(2019,1))) +
   autolayer(NN_for, series="Neural Network",PI=FALSE)+
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
   autolayer(TBATS_for,series="TBATS",PI=FALSE)+
