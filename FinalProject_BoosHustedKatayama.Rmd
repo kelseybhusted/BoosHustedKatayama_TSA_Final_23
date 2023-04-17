@@ -4,7 +4,7 @@ author: "Elise Boos, Kelsey Husted, Taro Katayama"
 date: "2023-04-11"
 output: pdf_document
 editor_options: 
-  chunk_output_type: inline
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -13,14 +13,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Load Data
 
-```{r cars}
+```{r}
 require(tidyverse)
 require(tseries)
 require(forecast)
 require(lubridate)
 require(ggplot2)
 require(Kendall)
-
+library(kableExtra)
 temp <- read.csv("./Data_Raw/Temperature_Data.csv")
 ```
 
@@ -113,7 +113,7 @@ summary(SeasonalMannKendall(ts_temp_AUS))
 
 ##Temperature Forecasting Test (BRA)
 ```{r forecast test}
-#AUTO ARTIMA
+#AUTO ARIMA
 ts_temp_BRA_sub <-window(ts_temp_BRA, start = c(2000,1), end = c(2021,12))
 
 arima <- auto.arima(ts_temp_BRA_sub,seasonal=FALSE, 
@@ -121,6 +121,11 @@ arima <- auto.arima(ts_temp_BRA_sub,seasonal=FALSE,
 
 ARIMA_forecast <- forecast(arima,h=365)
 
+#ARIMA with seasonality added back
+
+seasonality<- decompose_temp_BRA$seasonal[1:365]
+
+for_and_seasonality<- ARIMA_forecast$mean + seasonality
 
 ts_temp_BRA2_sub <-window(ts_temp_BRA2, start = c(2000,1), end = c(2021,12))
 ### ARIMA + Fourier Terms
@@ -134,6 +139,7 @@ ARIMA_Four_for <- forecast(ARIMA_Four,
                                         K=c(2,12),
                                         h=365),
                            h=365)
+
 
 #### NEURAL NETWORK 
 NN_fit <- nnetar(ts_temp_BRA2_sub,p=1,P=1)
@@ -157,6 +163,18 @@ NN_score <- accuracy(NN_for)
 TBATS_score <- accuracy(TBATS_for)
 ETS_score <- accuracy(ETS_fit)
 
+#accuracy for arima + seasonality
+ARIMA_SEAS=as.matrix(for_and_seasonality)
+observed = ts_temp_BRA_sub[7313:7677]
+n=365
+
+ME = sum(observed - ARIMA_SEAS)/n
+RMSE_ARIMA_SEAS = sqrt(MSE_ARIMA_SEAS)
+MAE = sum(abs(observed - ARIMA_SEAS))/n
+MPE = sum((observed - ARIMA_SEAS)/observed)/n*100
+MSE_ARIMA_SEAS = sum((observed - ARIMA_SEAS)^2)/n
+MAPE_ARIMA_SEAS = sum(abs(observed - ARIMA_SEAS)/observed)/n*100
+MAPE = sum(abs(observed - ARIMA_SEAS)/observed)/n*100
 
 scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
 row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
@@ -169,6 +187,7 @@ autoplot(window(ts_temp_BRA, start = c(2019,1))) +
   autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
   autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
+  autolayer(for_and_seasonality, series = "ARIMA + Seasonality")+
   ylab("Temperature") 
 ```
 
@@ -180,6 +199,12 @@ arima <- auto.arima(ts_temp_BRA,seasonal=FALSE,
                              lambda=0)
 
 ARIMA_forecast <- forecast(arima,h=365)
+
+#ARIMA with seasonality added back
+
+seasonality<- decompose_temp_BRA$seasonal[1:365]
+
+for_and_seasonality<- ARIMA_forecast$mean + seasonality
 
 ### ARIMA + Fourier Terms
 ARIMA_Four <- auto.arima(ts_temp_BRA2,
@@ -216,9 +241,10 @@ autoplot(window(ts_temp_BRA, start = c(2019,1))) +
   autolayer(TBATS_for,series="TBATS",PI=FALSE)+
   autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
   autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
+  autolayer(for_and_seasonality, series="ARIMA + Seasonality")+
   ylab("Temperature") 
 
-
+#create accuracy test for each forecast
 a_score <- accuracy(ARIMA_forecast)
 a2_score <- accuracy(ARIMA_Four_for)
 NN_score <- accuracy(NN_for)
@@ -226,9 +252,15 @@ TBATS_score <- accuracy(TBATS_for)
 ETS_score <- accuracy(ETS_fit)
 
 
+#create accuracy test matrix
 scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
 row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
 scores
+
+kbl(scores, 
+      caption = "Forecast Accuracy for Brazil Temperature Data",
+      digits = array(5,ncol(scores))) %>%
+  kable_styling(full_width = FALSE, position = "center", html_font="Cambria")
 ```
 
 
@@ -351,6 +383,11 @@ ETS_score <- accuracy(ETS_fit)
 scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
 row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
 scores
+
+kbl(scores, 
+      caption = "Forecast Accuracy for Australia Temperature Data",
+      digits = array(5,ncol(scores))) %>%
+  kable_styling(full_width = FALSE, position = "center", html_font="Cambria")
 ```
 
 ##Temperature Forecasting Test (USA)
@@ -473,5 +510,10 @@ ETS_score <- accuracy(ETS_fit)
 scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
 row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
 scores
+
+kbl(scores, 
+      caption = "Forecast Accuracy for USA Temperature Data",
+      digits = array(5,ncol(scores))) %>%
+  kable_styling(full_width = FALSE, position = "center", html_font="Cambria")
 ```
 
