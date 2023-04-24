@@ -7,13 +7,13 @@ editor_options:
   chunk_output_type: console
 ---
 
-###Regional Weather Forecasting
+### Regional Weather Forecasting
 
-##Objectives
+## Objectives
 
 Forecasting temperatures is useful for energy usage projections in the future. Additionally, analyzing climate-related data at national-level is important since climate change may impact certain regions more significantly than others. Discrepancies between regions can potentially result in energy allotment adjustments.
 
-##Method
+## Method
 
 Temperature data was obtained from the International Energy Agency website and was readily available to download at the grid, national, and sub-national level. Daily and monthly resolution data was provided ranging from 2000 to the present. After importing and wrangling the data, a time series variable was created. Finally, a variety of models were fit to the data to find the closest fit for forecasting purposes.
 
@@ -23,9 +23,9 @@ Temperature data was obtained from the International Energy Agency website and w
 knitr::opts_chunk$set(echo = TRUE,tidy.opts=list(width.cutoff=80), tidy=FALSE) 
 ```
 
-###Load Data
+### Load Data
 
-```{Load Data, warning=FALSE, message=FALSE}
+```{r Load Data, warning=FALSE, message=FALSE}
 require(tidyverse)
 require(tseries)
 require(forecast)
@@ -37,9 +37,9 @@ temp <- read.csv("./Data_Raw/Temperature_Data.csv")
 ```
 
 
-###Tidy data
+### Tidy data
 
-```{Tidy,  warning=FALSE, message=FALSE}
+```{r Tidy,  warning=FALSE, message=FALSE}
 temp_processed<- temp%>%
   mutate(Date = as.Date(Date, format = "%d-%m-%y"))%>%
   rename(Temp= Temperaturedaily)%>%
@@ -49,9 +49,9 @@ temp_processed<- temp%>%
 ```
 
 
-###Time series transformation (BRA)
+### Time series transformation (BRA)
 
-```{ts,  warning=FALSE, message=FALSE}
+```{r ts,  warning=FALSE, message=FALSE}
 #Filter for Brazil 
 #Temperature
 BRA_temp <- temp_processed%>%
@@ -79,9 +79,9 @@ summary(SeasonalMannKendall(ts_temp_BRA))
 ```
 
 
-###Time series transformation (USA)
+### Time series transformation (USA)
 
-```{ts USA,  warning=FALSE, message=FALSE}
+```{r ts USA,  warning=FALSE, message=FALSE}
 #Filter for USA
 #Temperature
 USA_temp <- temp_processed%>%
@@ -108,7 +108,7 @@ summary(SeasonalMannKendall(ts_temp_USA))
 
 ###Time series transformation (AUS)
 
-```{ts AUS,  warning=FALSE, message=FALSE}
+```{r ts AUS,  warning=FALSE, message=FALSE}
 #Filter for Australia
 #Temperature
 AUS_temp <- temp_processed%>%
@@ -133,7 +133,7 @@ summary(SeasonalMannKendall(ts_temp_AUS))
 ```
 
 
-###Temperature Forecasting Test (BRA)
+### Temperature Forecasting Test (BRA)
 
 ```{r forecast test,  warning=FALSE, message=FALSE}
 #AUTO ARIMA
@@ -204,7 +204,7 @@ autoplot(window(ts_temp_BRA, start = c(2019,1))) +
 ```
 
 
-###Temperature Forecasting (BRA)
+### Temperature Forecasting (BRA)
 
 ```{r forecast,  warning=FALSE, message=FALSE}
 #AUTO ARTIMA
@@ -277,7 +277,7 @@ kbl(scores,
 ```
 
 
-###Temperature Forecasting Test (AUS)
+### Temperature Forecasting Test (AUS)
 
 ```{r forecast test AUS,  warning=FALSE, message=FALSE}
 #AUTO ARTIMA
@@ -343,7 +343,7 @@ autoplot(window(ts_temp_AUS, start = c(2019,1))) +
 ```
 
 
-###Temperature Forecasting (AUS)
+### Temperature Forecasting (AUS)
 
 ```{r forecast AUS,  warning=FALSE, message=FALSE}
 #AUTO ARTIMA
@@ -407,7 +407,7 @@ kbl(scores,
   kable_styling(full_width = FALSE, position = "center", html_font="Cambria")
 ```
 
-###Temperature Forecasting Test (USA)
+### Temperature Forecasting Test (USA)
 
 ```{r forecast test USA, warning=FALSE, message=FALSE}
 #AUTO ARTIMA
@@ -539,7 +539,7 @@ kbl(scores,
   kable_styling(full_width = FALSE, position = "center", html_font="Cambria")
 ```
 
-##Discussion
+## Discussion
 The positive linear temperature trends for Brazil, United States, and Australia indicate the presence of climate change effects (Seasonal Mann-Kendall: p-values < 0.05). Temperature trends for the three countries follow a similar visual trend No one country looks to be increasing in temperature quicker than the other two. 
 
 The ARIMA + Fourier and TBATS model are generally the best predictors for temperature changes over time as displayed in the error terms. However, looking at the forecasts, the STL + ETS looks to do best in all three countries. This is not reflected in the error terms. One explanation for this might be because the accuracy function only uses the training set to provide the accuracy scores. It cannot get the accuracy score for forecasted values that do not have observed values yet. For this reason, the test sets might provide a more accurate representation of which forecasting model performs the best. In the test accuracy function, we were able to provide the test set error along with the training set error to provide the most accurate error scores. 
@@ -548,7 +548,7 @@ Future steps might include looking into exogenous variables or events related to
 
 Furthermore, it might be interesting to model precipitation or model more localized temperature trends in the future. Particularly, climate change has changed precipitation regimes, and would be vital to understand these trends in the context of climate risks and vulnerability. We looked at temperature trends over a national scale, however temperature trends may be masked at this granularity. Future forecasting studies may delve into localized temperature predictions.
 
-##Limitations
+## Limitations
 
 Temperatures were generalized for the entire countries analyzed in this project. This approach can cause issues since regional climates in countries can contrast significantly. Countries were also selected bases on personal biases. Although daily data was available, only monthly temperatures were forecasted. Daily temperature would allow for a finer tuned model that would pick up weekly trends. Error terms were compared amongst forecasts, which only gave us a limited understanding of how good the forecast was. 
 
