@@ -20,7 +20,7 @@ Temperature data was obtained from the International Energy Agency website and w
 (Discussion and Limitations at the bottom of rmd)
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,tidy.opts=list(width.cutoff=80), tidy=FALSE) 
 ```
 
 ###Load Data
