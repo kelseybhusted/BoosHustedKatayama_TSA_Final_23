@@ -139,6 +139,8 @@ summary(SeasonalMannKendall(ts_temp_AUS))
 #AUTO ARIMA
 ts_temp_BRA_sub <-window(ts_temp_BRA, start = c(2000,1), end = c(2021,12))
 
+ts_actual_forecast<- window(ts_temp_AUS, start = c(2022,1), end = c(2022,12))
+
 arima <- auto.arima(ts_temp_BRA_sub,seasonal=FALSE, 
                              lambda=0)
 
@@ -179,15 +181,15 @@ TBATS_for <- forecast(TBATS_fit, h=365)
 ### STL + ETS
 ETS_fit <- stlf(ts_temp_BRA2_sub, h=365)
 
-###ACCURACY
-a_score <- accuracy(ARIMA_forecast)
-a2_score <- accuracy(ARIMA_Four_for)
-NN_score <- accuracy(NN_for)
-TBATS_score <- accuracy(TBATS_for)
-ETS_score <- accuracy(ETS_fit)
+a_score <- accuracy(ARIMA_forecast, ts_actual_forecast)
+a2_score <- accuracy(ARIMA_Four_for, ts_actual_forecast)
+NN_score <- accuracy(NN_for, ts_actual_forecast)
+TBATS_score <- accuracy(TBATS_for, ts_actual_forecast)
+ETS_score <- accuracy(ETS_fit, ts_actual_forecast)
 
 scores <- as.data.frame(rbind(a_score, a2_score, NN_score, TBATS_score, ETS_score))
-row.names(scores) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
+row.names(scores) <- c("ARIMA_training", "ARIMA_test", "ARIMA FOURIER_training","ARIMA FOURIER_TEST",
+"NN_training", "NN_test","TBATS_training", "TBATS_test", "STL + ETS_training", "STL + ETS_test")
 scores
 
 
@@ -281,6 +283,8 @@ kbl(scores,
 #AUTO ARTIMA
 ts_temp_AUS_sub <-window(ts_temp_AUS, start = c(2000,1), end = c(2021,12))
 
+ts_actual_forecast<- window(ts_temp_AUS, start = c(2022,1), end = c(2022,12))
+
 arima_AUS <- auto.arima(ts_temp_AUS_sub,seasonal=FALSE, 
                              lambda=0)
 
@@ -316,15 +320,16 @@ TBATS_for_AUS <- forecast(TBATS_fit_AUS, h=365)
 ETS_fit_AUS <- stlf(ts_temp_AUS2_sub, h=365)
 
 ###ACCURACY
-a_score_AUS <- accuracy(ARIMA_forecast_AUS)
-a2_score_AUS <- accuracy(ARIMA_Four_AUS_for)
-NN_score_AUS <- accuracy(NN_for_AUS)
-TBATS_score_AUS <- accuracy(TBATS_for_AUS)
-ETS_score_AUS <- accuracy(ETS_fit_AUS)
+a_score_AUS <- accuracy(ARIMA_forecast_AUS, ts_actual_forecast)
+a2_score_AUS <- accuracy(ARIMA_Four_AUS_for, ts_actual_forecast)
+NN_score_AUS <- accuracy(NN_for_AUS, ts_actual_forecast)
+TBATS_score_AUS <- accuracy(TBATS_for_AUS, ts_actual_forecast)
+ETS_score_AUS <- accuracy(ETS_fit_AUS, ts_actual_forecast)
 
 
 scores_AUS <- as.data.frame(rbind(a_score_AUS, a2_score_AUS, NN_score_AUS, TBATS_score_AUS, ETS_score_AUS))
-row.names(scores_AUS) <- c("ARIMA", "ARIMA FOURIER","NN", "TBATS", "STL + ETS")
+row.names(scores_AUS) <- c("ARIMA_training", "ARIMA_test", "ARIMA FOURIER_training","ARIMA FOURIER_TEST",
+"NN_training", "NN_test","TBATS_training", "TBATS_test", "STL + ETS_training", "STL + ETS_test")
 scores_AUS
 
 
@@ -535,8 +540,6 @@ kbl(scores,
 ```
 
 ##Discussion
-
-<<<<<<< HEAD
 The positive linear temperature trends for Brazil, United States, and Australia indicate the presence of climate change effects (Seasonal Mann-Kendall: p-values < 0.05). Temperature trends for the three countries follow a similar visual trend No one country looks to be increasing in temperature quicker than the other two. 
 
 The ARIMA + Fourier and TBATS model are generally the best predictors for temperature changes over time as displayed in the error terms. However, looking at the forecasts, the STL + ETS looks to do best in all three countries. This is not reflected in the error terms. One explanation for this might be because the accuracy function only uses the training set to provide the accuracy scores. It cannot get the accuracy score for forecasted values that do not have observed values yet. For this reason, the test sets might provide a more accurate representation of which forecasting model performs the best. In the test accuracy function, we were able to provide the test set error along with the training set error to provide the most accurate error scores. 
@@ -548,11 +551,4 @@ Furthermore, it might be interesting to model precipitation or model more locali
 ##Limitations
 
 Temperatures were generalized for the entire countries analyzed in this project. This approach can cause issues since regional climates in countries can contrast significantly. Countries were also selected bases on personal biases. Although daily data was available, only monthly temperatures were forecasted. Daily temperature would allow for a finer tuned model that would pick up weekly trends. Error terms were compared amongst forecasts, which only gave us a limited understanding of how good the forecast was. 
-=======
-The positive linear temperature trends for Brazil, the United States, and Australia indicate the presence of climate change effects over time (Seasonal Mann-Kendall: p-values < 0.05). The ARIMA + Fourier and TBATS models were generally the best predictors for temperature changes over time as displayed in the error terms. Future steps might include looking into exogenous variables or events related to temperature such as precipitation, El Nino, and La Nina.
 
-##Limitations
-
-Temperatures were generalized for the entire countries analyzed in this project. This approach may have caused issues since regional climates in countries can contrast significantly. Countries were also selected based on personal biases. Although daily data was available, only monthly temperatures were forecasted. 
-
->>>>>>> 26349defac47e6666e67f6735736712929fcd614
