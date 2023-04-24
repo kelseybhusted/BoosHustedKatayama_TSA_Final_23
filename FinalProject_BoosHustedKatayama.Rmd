@@ -11,11 +11,11 @@ editor_options:
 
 ##Objectives
 
-Forecasting temperatures is useful for energy usage projections in the future. Additionally, analyzing climate-related data at a national-level is important since climate change may impact certain regions more significantly than others. This could potentially result in energy allotment adjustments.
+Forecasting temperatures is useful for energy usage projections in the future. Additionally, analyzing climate-related data at national-level is important since climate change may impact certain regions more significantly than others. Discrepancies between regions can potentially result in energy allotment adjustments.
 
 ##Method
 
-Temperature data was obtained from the International Energy Agency website and was available to download at the grid, national, and sub-national level. Daily and monthly resolution data was provided that ranged from 2000 to the present. After importing and wrangling the data below, a time series variable was created.
+Temperature data was obtained from the International Energy Agency website and was readily available to download at the grid, national, and sub-national level. Daily and monthly resolution data was provided ranging from 2000 to the present. After importing and wrangling the data, a time series variable was created. Finally, a variety of models were fit to the data to find the closest fit for forecasting purposes.
 
 (Discussion and Limitations at the bottom of rmd)
 
@@ -544,9 +544,9 @@ kbl(scores,
 
 ##Discussion
 
-The positive linear temperature trends for Brazil, United States, and Australia indicate the presence of climate change effects (Seasonal Mann-Kendall: p-values < 0.05). The ARIMA + Fourier and TBATS model are generally the best predictors for temperature changes over time as displayed in the error terms. Future steps might include looking into exogenous variables or events related to temperature such as precipitation, El Nino, and La Nina.
+The positive linear temperature trends for Brazil, the United States, and Australia indicate the presence of climate change effects over time (Seasonal Mann-Kendall: p-values < 0.05). The ARIMA + Fourier and TBATS models were generally the best predictors for temperature changes over time as displayed in the error terms. Future steps might include looking into exogenous variables or events related to temperature such as precipitation, El Nino, and La Nina.
 
 ##Limitations
 
-Temperatures were generalized for the entire countries analyzed in this project. This approach can cause issues since regional climates in countries can contrast significantly. Countries were also selected bases on personal biases. Although daily data was available, only monthly temperatures were forecasted. 
+Temperatures were generalized for the entire countries analyzed in this project. This approach may have caused issues since regional climates in countries can contrast significantly. Countries were also selected based on personal biases. Although daily data was available, only monthly temperatures were forecasted. 
 
