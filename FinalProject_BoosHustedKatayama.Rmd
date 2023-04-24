@@ -469,7 +469,7 @@ autoplot(window(ts_temp_USA, start = c(2019,1))) +
   autolayer(NN_for, series="Neural Network",PI=FALSE)+
   autolayer(TBATS_for,series="TBATS",PI=FALSE)+
   autolayer(ETS_fit,series="STL + ETS",PI=FALSE)+
-  autolayer(ARIMA_Four_for, series="ARIMA_FOURIER",PI=FALSE)+
+  autolayer(ARIMA_Four_USA_for, series="ARIMA_FOURIER",PI=FALSE)+
   autolayer(ARIMA_forecast, series="ARIMA",PI=FALSE)+
   ylab("Temperature") 
 ```
